@@ -1,7 +1,7 @@
 var earthquakeData = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 var earthquakes = L.layerGroup();
 
-var grayscaleMap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
   attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
   tileSize: 512,
   maxZoom: 18,
@@ -15,8 +15,6 @@ var myMap = L.map('map', {
     zoom: 5
 })
 
-
-d3.json(earthquakeData, function(earthquakeData) {
 
 function getColor(magnitude){
     switch(true){
@@ -70,37 +68,37 @@ function getRadius(magnitude){
     }
 }
 
-    L.geoJson(earthquakeData,{
-        pointToLayer: function (feature, latlng) {
-            return L.circleMarker(latlng, {
-                radius: markerSize(feature.properties.mag),
-                fillColor: chooseColor(feature.geometry.coordinates[2]),
-                fillOpacity: 0.7,
-                color: "#000000",
-                stroke: true,
-                weight: 1,
-            });
-        },
-        onEachFeature: function(feature, layer){
-            layer.bindPopup("<h3>Location: " + feature.properties.place + "</h3><hr><p>Date: "
-            + new Date(feature.properties.time) + "</p><hr><p>Magnitude: " + feature.properties.mag + "</p>");
-        }
-}).addTo(myMap);
+d3.json(earthquakeData, function(earthquakeData) {
 
-earthquakes.addTo(myMap);
+L.geoJson(earthquakeData,{
+    pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, {
+            radius: markerSize(feature.properties.mag),
+            fillColor: chooseColor(feature.geometry.coordinates[2]),
+            fillOpacity: 0.7,
+            color: "#000000",
+            stroke: true,
+            weight: 1,
+        });
+    },
+    onEachFeature: function(feature, layer){
+        layer.bindPopup("<h3>Location: " + feature.properties.place + "</h3><hr><p>Date: "
+        + new Date(feature.properties.time) + "</p><hr><p>Magnitude: " + feature.properties.mag + "</p>");
+    }
+}).addTo(myMap);
 
 var legend = L.control({position: 'bottomright'});
 legend.onAdd = function() {
-    var div = L.DomUtil.create('div', 'info legend'),
-        magnitude = [0, 1, 2, 3, 4, 5],
+var div = L.DomUtil.create('div', 'info legend'),
+    magnitude = [0, 1, 2, 3, 4, 5],
 
-   for (var i = 0; i < magnitude.length; i++) {
-        div.innerHTML +=
-            '<i style="background:' + getColor(magnitude[i] + 1) + '"></i> ' +
-            magnitude[i] + (magnitude[i + 1] ? '&ndash;' + magnitude[i + 1] + '<br>' : '+');
-    }
+for (var i = 0; i < magnitude.length; i++) {
+    div.innerHTML +=
+        '<i style="background:' + getColor(magnitude[i] + 1) + '"></i> ' +
+        magnitude[i] + (magnitude[i + 1] ? '&ndash;' + magnitude[i + 1] + '<br>' : '+');
+}
 
-    return div;
+return div;
 };
 
 legend.addTo(myMap);
