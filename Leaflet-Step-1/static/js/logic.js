@@ -1,11 +1,7 @@
 var earthquakeData = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
+var earthquakes = L.layerGroup();
 
-var myMap = L.map('map', {
-    center: [38, -96],
-    zoom: 5
-})
-
-L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+var grayscaleMap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
   attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
   tileSize: 512,
   maxZoom: 18,
@@ -13,6 +9,14 @@ L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
   id: "mapbox/light-v10",
   accessToken: API_KEY
 }).addTo(myMap);
+
+var myMap = L.map('map', {
+    center: [38, -96],
+    zoom: 5
+})
+
+
+d3.json(earthquakeData, function(earthquakeData) {
 
 function getColor(magnitude){
     switch(true){
@@ -66,31 +70,31 @@ function getRadius(magnitude){
     }
 }
 
-d3.json(earthquakeData).then(function(data){
-
-    L.geoJson(data,{
+    L.geoJson(earthquakeData,{
         pointToLayer: function (feature, latlng) {
             return L.circleMarker(latlng, {
-                radius: getRadius(feature.properties.mag),
-                fillColor: getColor(feature.properties.mag),
-                color: "black",
+                radius: markerSize(feature.properties.mag),
+                fillColor: chooseColor(feature.geometry.coordinates[2]),
+                fillOpacity: 0.7,
+                color: "#000000",
+                stroke: true,
                 weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
             });
         },
         onEachFeature: function(feature, layer){
-            layer.bindPopup(`<h3>${feature.properties.place}</h3><hr><span>Magnitude: ${feature.properties.magnitude}</span>`)
+            layer.bindPopup("<h3>Location: " + feature.properties.place + "</h3><hr><p>Date: "
+            + new Date(feature.properties.time) + "</p><hr><p>Magnitude: " + feature.properties.mag + "</p>");
         }
-    }).addTo(myMap);
+}).addTo(myMap);
+
+earthquakes.addTo(myMap);
 
 var legend = L.control({position: 'bottomright'});
-legend.onAdd = function (map) {
-
+legend.onAdd = function() {
     var div = L.DomUtil.create('div', 'info legend'),
         magnitude = [0, 1, 2, 3, 4, 5],
-        
-    for (var i = 0; i < magnitude.length; i++) {
+
+   for (var i = 0; i < magnitude.length; i++) {
         div.innerHTML +=
             '<i style="background:' + getColor(magnitude[i] + 1) + '"></i> ' +
             magnitude[i] + (magnitude[i + 1] ? '&ndash;' + magnitude[i + 1] + '<br>' : '+');
@@ -99,7 +103,8 @@ legend.onAdd = function (map) {
     return div;
 };
 
-legend.addTo(map);
+legend.addTo(myMap);
+
 
 });
 // https://leafletjs.com/examples/choropleth/ <-- for the above legend
