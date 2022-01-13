@@ -14,6 +14,7 @@ html {
   color: '#333333';
   padding: 6px 8px;
   background: '#ffffff';
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .legend i {

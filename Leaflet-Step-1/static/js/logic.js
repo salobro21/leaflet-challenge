@@ -8,17 +8,9 @@ var grayscaleMap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/
   zoomOffset: -1,
   id: "mapbox/light-v10",
   accessToken: API_KEY
-});
+}).addTo(myMap);
 
-var myMap = L.map("mapid", {
-    center: [
-        38.0, -96.0
-    ],
-    zoom: 2,
-    layers: [grayscalemap, earthquakes]
-});
-
-// Determine the color of the earth quake
+d3.json(earthquakesURL, function(earthquakeData) {
 function getColor(magnitude){
     switch(true){
         case (magnitude <= 1):
@@ -42,7 +34,6 @@ function getColor(magnitude){
     }
 }
 
-// Determine the size of the marker based on earthquake magnitude
 function getRadius(magnitude){
     switch(true){
         case (magnitude <= 1):
@@ -68,14 +59,16 @@ function getRadius(magnitude){
             break;
     }
 }
-
+});
 d3.json(earthquakeData).then(function(data){
+
     L.geoJson(data,{
-        pointToLayer: function (feature,latlng){ 
+        pointToLayer: function (feature, latlng) {
+            // Create a circle marker
             return L.circleMarker(latlng, {
-                radius: getRadius(feature.properties.mag),
-                fillColor: getColor(feature.properties.mag),
-                color: "#000",
+                radius: getRadius(feature.properties.mag), // different radius for different magnitude
+                fillColor: getColor(feature.properties.mag), // different circle colors for different magnitude
+                color: "#000000",
                 weight: 1,
                 opacity: 1,
                 fillOpacity: 0.8
@@ -85,22 +78,4 @@ d3.json(earthquakeData).then(function(data){
             layer.bindPopup(`<h3>${feature.properties.place}</h3><hr><span>Magnitude: ${feature.properties.mag}</span>`)
         }
     }).addTo(myMap);
-
-    var legend = L.control({position: 'bottomright'});
-    legend.onAdd = function (map) {
-
-        var div = L.DomUtil.create('div', 'info legend'),
-            mag = [0, 1, 2, 3, 4, 5]
-        
-        div.innerHTML += "<h4>Magnitude Level</h4><hr>"
-          for (var i = 0; i < mag.length; i++) {
-            div.innerHTML +=
-                '<i style="background:' + getColor(mag[i] + 1) + '"></i> ' +
-                mag[i] + (mag[i + 1] ? '&ndash;' + mag[i + 1] + '<br>' : '+');
-        }
-        return div;
-    };
-    legend.addTo(myMap);
-
 });
-
