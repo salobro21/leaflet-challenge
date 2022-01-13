@@ -102,5 +102,5 @@ d3.json(earthquakeData).then(function(data){
     };
     legend.addTo(myMap);
 
-}];
+});
 
