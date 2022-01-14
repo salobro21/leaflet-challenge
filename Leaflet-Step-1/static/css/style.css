@@ -9,12 +9,6 @@ html {
   height: 100%;
 }
 
-#mapid,
-body,
-html {
-  height: 100%;
-}
-
 .legend {
   line-height: 20px;
   color: '#333333';
@@ -28,6 +22,5 @@ html {
   height: 20px;
   float: left;
   margin-right: 8px;
-  margin-left: 8px;
   opacity: 0.8;
 }

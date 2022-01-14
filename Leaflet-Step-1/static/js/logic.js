@@ -71,11 +71,11 @@ d3.json(earthquakeData).then(function(data){
 L.geoJson(data,{
     pointToLayer: function (feature, latlng) {
         return L.circleMarker(latlng, {
-            radius: markerSize(feature.properties.mag),
-            fillColor: chooseColor(feature.geometry.coordinates[2]),
-            fillOpacity: 0.7,
-            color: "#000000",
-            stroke: true,
+            radius: getRadius(feature.properties.mag),
+            fillColor: getColor(feature.properties.mag),
+            fillOpacity: 0.75,
+            color: "#000",
+            opacity: 1,
             weight: 1,
         });
     },
@@ -87,12 +87,12 @@ L.geoJson(data,{
 var legend = L.control({position: 'bottomright'});
 legend.onAdd = function(map) {
 var div = L.DomUtil.create('div', 'info legend'),
-    magnitude = [0, 1, 2, 3, 4, 5]
+    mag = [0, 1, 2, 3, 4, 5]
 
-for (var i = 0; i < magnitude.length; i++) {
+for (var i = 0; i < mag.length; i++) {
     div.innerHTML +=
-        '<i style="background:' + getColor(magnitude[i] + 1) + '"></i> ' +
-        magnitude[i] + (magnitude[i + 1] ? '&ndash;' + magnitude[i + 1] + '<br>' : '+');
+        '<i style="background:' + getColor(mag[i] + 1) + '"></i> ' +
+        mag[i] + (mag[i + 1] ? '&ndash;' + mag[i + 1] + '<br>' : '+');
 }
 
 return div;
