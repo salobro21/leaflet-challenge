@@ -1,5 +1,7 @@
-var earthquakeData = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
-var earthquakes = L.layerGroup();
+var myMap = L.map('map', {
+    center: [38, -96],
+    zoom: 5
+})
 
 L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
   attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
@@ -9,12 +11,6 @@ L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
   id: "mapbox/light-v10",
   accessToken: API_KEY
 }).addTo(myMap);
-
-var myMap = L.map('map', {
-    center: [38, -96],
-    zoom: 5
-})
-
 
 function getColor(magnitude){
     switch(true){
@@ -68,9 +64,11 @@ function getRadius(magnitude){
     }
 }
 
-d3.json(earthquakeData, function(earthquakeData) {
+var earthquakeData = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
-L.geoJson(earthquakeData,{
+d3.json(earthquakeData).then(function(data){
+
+L.geoJson(data,{
     pointToLayer: function (feature, latlng) {
         return L.circleMarker(latlng, {
             radius: markerSize(feature.properties.mag),
@@ -82,15 +80,14 @@ L.geoJson(earthquakeData,{
         });
     },
     onEachFeature: function(feature, layer){
-        layer.bindPopup("<h3>Location: " + feature.properties.place + "</h3><hr><p>Date: "
-        + new Date(feature.properties.time) + "</p><hr><p>Magnitude: " + feature.properties.mag + "</p>");
+        layer.bindPopup(`<h3>${feature.properties.place}</h3><hr><span>Magnitude: ${feature.properties.mag}</span>`)
     }
 }).addTo(myMap);
 
 var legend = L.control({position: 'bottomright'});
-legend.onAdd = function() {
+legend.onAdd = function(map) {
 var div = L.DomUtil.create('div', 'info legend'),
-    magnitude = [0, 1, 2, 3, 4, 5],
+    magnitude = [0, 1, 2, 3, 4, 5]
 
 for (var i = 0; i < magnitude.length; i++) {
     div.innerHTML +=
@@ -102,7 +99,6 @@ return div;
 };
 
 legend.addTo(myMap);
-
 
 });
 // https://leafletjs.com/examples/choropleth/ <-- for the above legend
